@@ -1,25 +1,20 @@
 # 🚀 SystemVerilog RISC-V RV32I MCU SoC
 
-<div align="center">
+![Architecture](https://img.shields.io/badge/Architecture-RISC--V_RV32I-purple?style=flat&logo=riscv)
+![Bus](https://img.shields.io/badge/Bus_Protocol-AMBA_APB-orange?style=flat)
+![Language](https://img.shields.io/badge/Language-SystemVerilog-green?style=flat&logo=systemverilog)
+![Verification](https://img.shields.io/badge/Verification-UVM_Style_OOP-blue?style=flat)
+![Platform](https://img.shields.io/badge/Platform-Xilinx_Vivado-red?style=flat&logo=xilinx)
 
-<img src="https://img.shields.io/badge/Architecture-RISC--V_RV32I-purple?style=flat&logo=riscv" />
-<img src="https://img.shields.io/badge/Bus_Protocol-AMBA_APB-orange?style=flat" />
-<img src="https://img.shields.io/badge/Language-SystemVerilog-green?style=flat&logo=systemverilog" />
-<img src="https://img.shields.io/badge/Verification-UVM_Style_OOP-blue?style=flat" />
-<img src="https://img.shields.io/badge/Platform-Xilinx_Vivado-red?style=flat&logo=xilinx" />
-
-<br>
-
-**32-bit RISC-V CPU Core + APB Interconnect + Peripherals (GPIO, UART)**<br>
-단일 사이클 CPU 코어와 표준 버스 프로토콜을 기반으로 설계된 FPGA 임베디드 MCU 시스템
-
-</div>
+> **32-bit RISC-V CPU Core + APB Interconnect + Peripherals (GPIO, UART)**<br>
+> 단일 사이클 CPU 코어와 표준 버스 프로토콜을 기반으로 설계된 FPGA 임베디드 MCU 시스템
 
 ---
 
 ## 📖 1. 프로젝트 개요 (Overview)
 
-이 프로젝트는 **SystemVerilog**를 사용하여 **RISC-V RV32I (Base Integer Instruction Set)** 아키텍처를 구현한 프로세서 설계입니다. CPU 코어는 **Control Unit**과 **DataPath**로 명확히 분리되어 있으며, 최상위 모듈인 `MCU`에서 **AMBA APB 프로토콜**을 통해 메모리 및 다양한 주변장치(UART, GPIO)와 통합되어 실제 임베디드 어플리케이션을 실행할 수 있는 SoC 구조를 갖추고 있습니다.
+이 프로젝트는 **SystemVerilog**를 사용하여 **RISC-V RV32I (Base Integer Instruction Set)** 아키텍처를 구현한 프로세서 설계입니다.
+CPU 코어는 **Control Unit**과 **DataPath**로 명확히 분리되어 있으며, 최상위 모듈인 `MCU`에서 **AMBA APB 프로토콜**을 통해 메모리 및 다양한 주변장치(UART, GPIO)와 통합되어 실제 임베디드 어플리케이션을 실행할 수 있는 SoC 구조를 갖추고 있습니다.
 
 ### ✨ 핵심 설계 특징 (Key Features)
 * **RISC-V Core:** 산술/논리, 메모리, 분기 등 RV32I 명령어 셋을 완벽히 지원하는 단일 사이클 프로세서.
