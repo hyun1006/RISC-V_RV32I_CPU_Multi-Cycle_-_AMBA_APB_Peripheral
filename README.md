@@ -6,7 +6,8 @@
 ![Verification](https://img.shields.io/badge/Verification-UVM_Style_OOP-blue?style=flat)
 ![Platform](https://img.shields.io/badge/Platform-Xilinx_Vivado-red?style=flat&logo=xilinx)
 
-> **32-bit RISC-V CPU Core + APB Interconnect + Peripherals (GPIO, UART)**<br>
+> **32-bit RISC-V CPU Core + APB Interconnect + Peripherals (GPIO, UART)**
+>
 > 단일 사이클 CPU 코어와 표준 버스 프로토콜을 기반으로 설계된 FPGA 임베디드 MCU 시스템
 
 ---
@@ -261,5 +262,4 @@ APB 버스와 UART 주변장치를 중점적으로 검증하기 위해 **클래�
 
 > *Designed with SystemVerilog for RISC-V Architecture Study*
 
-```
 ```
