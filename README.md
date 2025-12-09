@@ -1,44 +1,35 @@
-# 🚀 SystemVerilog RISC-V RV32I MCU SoC
+# 🚀 SystemVerilog RISC-V RV32I Multi-Cycle MCU
 
-![Architecture](https://img.shields.io/badge/Architecture-RISC--V_RV32I-purple?style=flat&logo=riscv)
-![Bus](https://img.shields.io/badge/Bus_Protocol-AMBA_APB-orange?style=flat)
-![Language](https://img.shields.io/badge/Language-SystemVerilog-green?style=flat&logo=systemverilog)
-![Verification](https://img.shields.io/badge/Verification-UVM_Style_OOP-blue?style=flat)
-![Platform](https://img.shields.io/badge/Platform-Xilinx_Vivado-red?style=flat&logo=xilinx)
-
-> **32-bit RISC-V CPU Core + APB Interconnect + Peripherals (GPIO, UART)**
+> **32-bit RISC-V Multi-Cycle CPU Core + APB Interconnect + Peripherals**
 >
-> 단일 사이클 CPU 코어와 표준 버스 프로토콜을 기반으로 설계된 FPGA 임베디드 MCU 시스템
+> FSM 기반의 멀티 사이클 프로세서 설계 및 표준 버스 프로토콜을 적용한 FPGA 임베디드 MCU 시스템
 
----
+-----
 
 ## 📖 1. 프로젝트 개요 (Overview)
 
-이 프로젝트는 **SystemVerilog**를 사용하여 **RISC-V RV32I (Base Integer Instruction Set)** 아키텍처를 구현한 프로세서 설계입니다.
-CPU 코어는 **Control Unit**과 **DataPath**로 명확히 분리되어 있으며, 최상위 모듈인 `MCU`에서 **AMBA APB 프로토콜**을 통해 메모리 및 다양한 주변장치(UART, GPIO)와 통합되어 실제 임베디드 어플리케이션을 실행할 수 있는 SoC 구조를 갖추고 있습니다.
+이 프로젝트는 SystemVerilog를 사용하여 RISC-V RV32I (Base Integer Instruction Set) 아키텍처를 구현한 프로세서 설계입니다. CPU 코어는 Control Unit과 DataPath로 명확히 분리되어 있으며, 최상위 모듈인 MCU에서 AMBA APB 프로토콜을 통해 메모리 및 다양한 주변장치(UART, GPIO)와 통합되어 실제 임베디드 어플리케이션을 실행할 수 있는 SoC 구조를 갖추고 있습니다.
 
 ### ✨ 핵심 설계 특징 (Key Features)
-* **RISC-V Core:** 산술/논리, 메모리, 분기 등 RV32I 명령어 셋을 완벽히 지원하는 단일 사이클 프로세서.
-* **Bus System:** 표준 **AMBA APB 3.0 Protocol**을 구현한 Master Bridge를 통해 시스템 확장성 확보.
-* **Memory Architecture:**
-    * **Instruction Memory (ROM):** 프로그램 코드 저장 (Read Only).
-    * **Data Memory (RAM):** APB 슬레이브로 동작하는 4KB 데이터 저장소.
-* **Peripherals:**
-    * **GPIO:** GPO(LED 제어), GPI(Switch 입력), GPIO(양방향 입출력) 모듈 탑재.
-    * **UART:** 송수신(Tx/Rx) FIFO 및 상태 레지스터를 갖춘 시리얼 통신 컨트롤러.
-* **Advanced Verification:** Transaction, Driver, Monitor, Scoreboard 클래스를 활용한 **Constrained Random Verification** 환경 구축.
 
----
+  * **Multi-Cycle Microarchitecture:** FSM을 사용하여 명령어 종류에 따라 가변적인 클럭 사이클(3\~5 Cycles)을 소모하며 실행 효율 최적화.
+  * [cite_start]**FSM Based Control:** 14개의 상태(State)를 갖는 제어 유닛이 Datapath의 제어 신호를 순차적으로 관리 [cite: 1037-1050].
+  * **Bus System:** 표준 **AMBA APB 3.0 Protocol**을 구현한 Master Bridge를 통해 시스템 확장성 확보.
+  * **Peripherals Integration:** UART, GPIO(LED, Switch) 등의 주변장치를 APB 버스에 통합하여 SoC(System on Chip) 구성.
+  * **Advanced Verification:** OOP 기반의 트랜잭션 검증 환경을 통해 버스 프로토콜 및 시스템 동작 신뢰성 검증.
+
+-----
 
 ## 🏗️ 2. 시스템 아키텍처 (System Architecture)
 
 ### 2.1 MCU Top-Level Diagram
-CPU는 명령어 버스와 데이터 버스가 분리된 Harvard Architecture 구조를 가지며, 데이터 버스는 APB Bridge를 통해 주변 장치들과 연결됩니다.
+
+CPU는 명령어 인출과 데이터 접근을 위한 버스가 분리되어 있으며(Harvard Architecture), 주변 장치들은 APB Bridge를 통해 제어됩니다.
 
 ```mermaid
 graph TD
     subgraph "MCU (Micro Controller Unit)"
-        CPU["RISC-V CPU Core"] -->|Instr Addr| ROM["Instruction Memory (ROM)"]
+        CPU["RISC-V CPU Core (Multi-Cycle)"] -->|Instr Addr| ROM["Instruction Memory (ROM)"]
         ROM -->|Instr Code| CPU
         
         CPU -->|System Bus| BRIDGE["APB Master Bridge"]
@@ -49,10 +40,30 @@ graph TD
         BRIDGE -->|PSEL3| GPIO["GPIO (Bidirectional)"]
         BRIDGE -->|PSEL4| UART["UART Controller"]
     end
+```
 
-### 2.2 APB Memory Map
+### 2.2 CPU Internal Microarchitecture (Control & Datapath)
 
-[cite_start]`APB_Master` 내부의 디코더(`APB_Decoder`)에 의해 주소 공간이 다음과 같이 할당됩니다 [cite: 1343-1348].
+CPU는 상태 머신(Control Unit)의 현재 상태에 따라 ALU, MUX, 레지스터 등을 제어하여 다단계 연산을 수행합니다.
+
+```mermaid
+graph LR
+    Input["Instruction Code"] -->|Opcode| CU["Control Unit (FSM)"]
+    Input -->|"rs1, rs2, rd, imm"| DP["Data Path"]
+    
+    subgraph "CPU Core Logic"
+        CU -->|"State: FETCH/DECODE/EXE..."| STATE["FSM State Register"]
+        STATE -->|"Control Signals"| DP
+        
+        DP --> ALU
+        DP --> RF["Register File"]
+        DP --> PC["PC Logic"]
+    end
+```
+
+### 2.3 APB Memory Map
+
+`APB_Master` 내부의 디코더(`APB_Decoder`)에 의해 주소 공간이 다음과 같이 할당됩니다.
 
 | Slave Device | Base Address | Description | PSEL Index |
 | :--- | :--- | :--- | :---: |
@@ -62,161 +73,110 @@ graph TD
 | **GPIO** | `0x1000_3000` | 범용 양방향 입출력 포트 | PSEL3 |
 | **UART** | `0x1000_4000` | 시리얼 통신 (Tx/Rx Data & Status) | PSEL4 |
 
+-----
 
-2.3 CPU Core Microarchitecture
-CPU 내부는 제어 신호를 생성하는 Control Unit과 실제 연산을 수행하는 Data Path로 구성됩니다.
+## 💻 3. 멀티 사이클 상세 동작 명세 (Multi-Cycle FSM Specification)
 
-```mermaid
-graph LR
-    Input[Instruction Code] -->|Opcode| CU[Control Unit]
-    Input -->|rs1, rs2, rd, imm| DP[Data Path]
-    
-    subgraph "CPU Core Logic"
-        CU -->|ALU Control| ALU[ALU]
-        CU -->|RegFile WE| RF[Register File]
-        CU -->|Branch/Jump| PC[PC Logic]
-        CU -->|ImmSel| EXT[Imm Extender]
-        
-        RF <==>|"Operands"| ALU
-        EXT -->|"Immediate"| ALU
-        ALU -->|"Result / Address"| Output[Data Bus]
-    end
-```
+명령어 실행은 공통 단계(`FETCH`, `DECODE`)를 거친 후, 명령어 타입에 따라 서로 다른 상태 경로를 가집니다.
+
+### 🔄 공통 단계 (Common Stages)
+
+1.  **FETCH:** `PC` 주소에서 명령어를 읽어옵니다. (1 Cycle)
+2.  **DECODE:** Opcode를 분석하여 다음 상태(`XXX_EXE`)를 결정하고, 레지스터 파일에서 피연산자를 읽습니다. (1 Cycle)
+
+### 3.1 R-Type (Arithmetic/Logic)
+
+레지스터 간 연산 수행. 총 **3 Cycles** 소요 (`FETCH` → `DECODE` → `R_EXE`).
+
+  * **State Flow:**
+      * `R_EXE`: ALU가 연산을 수행하고 결과를 레지스터 파일(`rd`)에 씁니다. 다음 상태는 `FETCH`로 돌아갑니다.
+  * **Operations:** `ADD`, `SUB`, `SLL`, `SLT`, `XOR`, `SRL`, `OR`, `AND`.
+
+### 3.2 I-Type (Immediate Arithmetic)
+
+상수 연산 수행. 총 **3 Cycles** 소요 (`FETCH` → `DECODE` → `I_EXE`).
+
+  * **State Flow:**
+      * `I_EXE`: 레지스터(`rs1`)와 확장된 상수(`imm`)를 ALU 연산하고 결과를 저장합니다.
+  * **Operations:** `ADDI`, `ANDI`, `ORI`, `SLTI` 등.
+
+### 3.3 Load Instructions (I-Type)
+
+메모리 읽기. 가장 긴 경로인 **5 Cycles** 소요 (`FETCH` → `DECODE` → `L_EXE` → `L_MEM` → `L_WB`).
+
+  * **State Flow:**
+      * `L_EXE`: 주소 계산 (Base + Offset).
+      * `L_MEM`: 메모리(APB Bus) 접근 요청 및 데이터 대기 (`ready` 신호 확인).
+      * `L_WB`: 읽어온 데이터를 레지스터(`rd`)에 저장 (Write Back).
+  * **Operations:** `LB`, `LH`, `LW`, `LBU`, `LHU`.
+
+### 3.4 Store Instructions (S-Type)
+
+메모리 쓰기. 총 **4 Cycles** 소요 (`FETCH` → `DECODE` → `S_EXE` → `S_MEM`).
+
+  * **State Flow:**
+      * `S_EXE`: 주소 계산.
+      * `S_MEM`: 메모리(APB Bus)에 데이터 쓰기 요청 및 완료 대기.
+  * **Operations:** `SB`, `SH`, `SW`.
+
+### 3.5 Branch Instructions (B-Type)
+
+조건부 분기. 총 **3 Cycles** 소요 (`FETCH` → `DECODE` → `B_EXE`).
+
+  * **State Flow:**
+      * `B_EXE`: ALU에서 비교 연산 수행. 조건 만족 시 `PC`를 분기 주소로 업데이트.
+  * **Operations:** `BEQ`, `BNE`, `BLT`, `BGE` 등.
+
+### 3.6 Jump Instructions (J/I-Type)
+
+무조건 점프 및 링크. 총 **3 Cycles** 소요.
+
+  * **State Flow:**
+      * `J_EXE` / `JL_EXE`: 점프 주소 계산 후 `PC` 업데이트, 복귀 주소(`PC+4`)를 레지스터에 저장.
+  * **Operations:** `JAL` (J-Type), `JALR` (I-Type).
 
 -----
 
-## 💻 3. CPU 상세 기능 명세 (Detailed Specification)
-
-각 명령어 타입별 \*\*데이터 흐름(Data Flow)\*\*과 **제어 신호(Control Signal)** 동작 방식입니다.
-
-### 3.1 R-Type (Register-Register)
-
-레지스터 간의 산술 및 논리 연산을 수행합니다.
-
-  * **Instructions:** `ADD`, `SUB`, `SLL`, `SLT`, `XOR`, `SRL`, `OR`, `AND` 등.
-  * **Data Flow:**
-    1.  ROM에서 명령어를 인출(Fetch)합니다.
-    2.  Register File에서 `rs1`, `rs2` 데이터를 읽어 ALU로 전달합니다.
-    3.  [cite_start]ALU 연산 결과가 MUX(0번 입력)를 통해 다시 Register File(`rd`)에 저장됩니다[cite: 359].
-  * **Control Signals:**
-      * `reg_wr_en = 1`: 연산 결과를 저장하기 위해 활성화.
-      * `aluSrcMuxSel = 0`: 두 번째 피연산자로 레지스터값(`rs2`) 선택.
-      * `RegWdataSel = 0`: ALU 결과를 저장 데이터로 선택.
-
-### 3.2 I-Type (Immediate / Load)
-
-상수 연산 또는 메모리 로드 명령을 수행합니다.
-
-  * **Instructions:** `ADDI`, `ANDI`, `LB`, `LW`, `JALR` 등.
-  * **Data Flow (Arithmetic):**
-    1.  `rs1` 값과 확장된 `imm` 값이 ALU에서 연산됩니다.
-    2.  결과가 Register File에 저장됩니다.
-  * **Data Flow (Load):**
-    1.  ALU에서 `rs1 + imm` 주소를 계산합니다.
-    2.  [cite_start]APB Bus를 통해 RAM의 해당 주소 데이터를 읽어 MUX(1번 입력)를 통해 Register File에 저장합니다[cite: 358].
-  * **Control Signals (Load):**
-      * `reg_wr_en = 1`: 데이터 저장을 위해 활성화.
-      * `aluSrcMuxSel = 1`: 주소 계산을 위해 상수(`imm`) 선택.
-      * `RegWdataSel = 1`: 메모리에서 읽은 데이터(`busRData`) 선택.
-
-### 3.3 S-Type (Store)
-
-레지스터의 값을 메모리에 저장합니다.
-
-  * **Instructions:** `SB` (Byte), `SH` (Half), `SW` (Word).
-  * **Data Flow:**
-    1.  `rs1 + imm`을 통해 저장할 메모리 주소를 계산합니다.
-    2.  `rs2`의 값을 RAM(또는 Peripheral)의 데이터 포트로 전달합니다.
-  * **Control Signals:**
-      * [cite_start]`d_wr_en (busWe) = 1`: 버스 쓰기 활성화[cite: 229].
-      * `aluSrcMuxSel = 1`: 주소 계산용 상수 선택.
-
-### 3.4 B-Type (Branch)
-
-조건부 분기를 수행합니다.
-
-  * **Instructions:** `BEQ`, `BNE`, `BLT`, `BGE` 등.
-  * **Data Flow:**
-    1.  비교기(Comparator)가 `rs1`과 `rs2`를 비교하여 `b_taken` 신호를 생성합니다.
-    2.  [cite_start]`b_taken`이 참이면 `PC = PC + imm`, 거짓이면 `PC = PC + 4`로 업데이트됩니다[cite: 366].
-  * **Control Signals:**
-      * `branch = 1`: 분기 명령어임을 알림.
-      * `aluSrcMuxSel = 0`: 비교를 위해 레지스터값 선택.
-
-### 3.5 U-Type (Upper Immediate)
-
-상위 20비트 상수를 처리합니다.
-
-  * **Instructions:** `LUI`, `AUIPC`.
-  * **Data Flow:**
-    1.  20비트 `imm`을 32비트로 확장(하위 12비트 0)합니다.
-    2.  `LUI`: 확장된 값을 그대로 저장. `AUIPC`: `PC + imm` 값을 저장.
-  * **Control Signals (LUI):**
-      * `RegWdataSel = 2`: ALU를 거치지 않은 Immediate 값 선택.
-
-### 3.6 J-Type (Jump)
-
-무조건 점프 및 복귀 주소 저장을 수행합니다.
-
-  * **Instructions:** `JAL`, `JALR`.
-  * **Data Flow:**
-    1.  점프할 주소(`PC + imm` 또는 `rs1 + imm`)를 계산하여 PC를 업데이트합니다.
-    2.  복귀 주소(`PC + 4`)를 Register File에 저장합니다.
-  * **Control Signals:**
-      * `jal = 1`: PC 점프 활성화.
-      * `RegWdataSel = 4`: `PC + 4` 값을 저장 데이터로 선택.
-
------
-
-## 🔌 4. 버스 및 주변장치 상세 설계 (Bus & Peripherals Detail)
+## 🔌 4. 버스 및 주변장치 상세 (Bus & Peripherals)
 
 ### 4.1 APB Master Bridge (`APB_Master.sv`)
 
-CPU의 제어 신호(`busWe`, `addr`, `wdata`)를 받아 표준 APB 프로토콜의 3단계 상태 머신으로 변환합니다.
+멀티 사이클 CPU의 메모리 접근 단계(`MEM` State)에서 APB 프로토콜을 구동합니다.
 
-  * [cite_start]**FSM State Machine** [cite: 1329-1338]:
-    1.  **IDLE:** 전송 요청(`transfer`) 대기. 요청 시 주소와 데이터를 래치하고 `SETUP`으로 천이.
-    2.  **SETUP:** `PSELx`를 활성화하고 `PENABLE`을 0으로 설정. 다음 클럭에 `ACCESS`로 천이.
-    3.  **ACCESS:** `PENABLE`을 1로 설정. 슬레이브의 `PREADY`가 1이 될 때까지 대기 후 `IDLE`로 복귀.
-  * **Address Decoder:** `addr[15:12]` 비트를 디코딩하여 5개의 Slave 중 하나를 선택(`PSEL0`\~`PSEL4`)합니다.
+  * **FSM Control:** `IDLE` → `SETUP` → `ACCESS` 상태를 제어하며, 슬레이브의 `PREADY` 신호가 High가 될 때까지 CPU를 대기(Stall)시킵니다.
+  * **Role:** CPU의 동기식 버스 신호를 비동기적 성격의 주변장치 타이밍에 맞춰 변환해주는 브리지 역할을 수행합니다.
 
 ### 4.2 UART Controller (`UART_ph.sv`)
 
-APB 버스와 UART 모듈 간의 인터페이스를 담당하며, 내부 레지스터를 통해 제어됩니다.
+  * **Config:** 100MHz 클럭 기준 9600bps Baud Rate.
+  * **Registers:**
+      * `TX_DATA (0x00)`: 데이터 쓰기 시 전송 시작 (`tx_start`).
+      * `RX_DATA (0x04)`: 수신된 데이터 읽기.
+      * `STATUS (0x08)`: 송신 중(`tx_busy`) 또는 수신 완료(`rx_data_ready`) 상태 확인.
 
-  * [cite_start]**Internal Register Map** [cite: 146-147]:
-      * `0x00` (Write): **TX Data Register**. 값을 쓰면 `tx_start` 신호가 발생하여 전송 시작.
-      * `0x04` (Read): **RX Data Register**. 수신된 데이터가 저장됨.
-      * `0x08` (Read): **Status Register**. `bit[0]: tx_busy`, `bit[1]: rx_data_ready`.
-  * **Baud Rate Gen:** 100MHz 시스템 클럭을 분주하여 9600bps 통신 속도를 생성합니다.
+### 4.3 GPIO Modules (`GPIO.sv`)
 
-### 4.3 GPIO Modules (`GPIO.sv`, `GPO.sv`, `GPI.sv`)
-
-  * **GPO:** CPU가 쓴 데이터를 레지스터에 저장하고 외부 LED로 출력합니다.
-  * **GPI:** 외부 스위치 입력을 버퍼링하여 CPU가 읽을 수 있도록 합니다.
-  * [cite_start]**GPIO:** Tri-state 버퍼를 사용하여 입출력 방향 제어가 가능한 양방향 포트입니다[cite: 1391].
+  * **Tri-state Control:** 양방향 입출력을 지원하기 위해 `oe` (Output Enable) 신호에 따라 입력/출력 모드를 전환하는 버퍼 구조를 가집니다.
 
 -----
 
 ## 🧪 5. 검증 및 시뮬레이션 (Verification)
 
-이 프로젝트는 두 가지 레벨의 검증 환경을 제공합니다.
-
 ### 5.1 SystemVerilog OOP Testbench (`tb_master_uart.sv`)
 
 APB 버스와 UART 주변장치를 중점적으로 검증하기 위해 **클래스 기반 테스트벤치**를 도입했습니다.
 
-  * [cite_start]**Transaction Class:** `rand` 키워드를 사용하여 주소와 데이터를 랜덤 생성하며, `constraint`를 통해 유효한 주소 범위(TX/RX Reg)를 제한합니다[cite: 1153].
-  * **Automatic Checking:** `Driver`가 APB로 데이터를 쓰고, `Monitor`가 UART Tx 라인을 샘플링하여 데이터가 일치하는지 자동으로 비교(Self-Checking)합니다.
-      * **Scenario:** Random Address Access, TX/RX Loopback Test.
+  * **Transaction:** `rand` 키워드와 `constraint`를 사용하여 유효한 주소 범위(TX/RX Reg) 내의 랜덤 트랜잭션을 생성합니다.
+  * **Auto-Checking:**
+      * **Loopback Test:** UART TX로 보낸 데이터가 RX로 정확히 들어오는지 확인.
+      * **Register Access:** APB를 통한 레지스터 Read/Write 무결성 검증.
 
 ### 5.2 System Integration Test (`tb_rv32i.sv`)
 
-`ROM.sv`에 내장된 어셈블리 코드를 실행하여 CPU의 명령어 처리 능력과 전체 SoC 동작을 검증합니다.
+`ROM.sv`에 내장된 어셈블리 코드를 실행하여 전체 SoC 동작을 검증합니다.
 
-  * `ADD`, `SUB`, `AND`, `OR` 등 산술 논리 연산 검증.
-  * `SB`, `SW`, `LB`, `LW`를 통한 메모리 R/W 테스트.
-  * `BEQ`, `JAL` 등 분기 명령어를 통한 PC 제어 흐름 확인.
+  * **Clock Cycle Analysis:** 각 명령어가 설계된 FSM 상태(3\~5 Cycles)대로 정확히 수행되는지 파형을 통해 확인합니다.
+  * **Logic Verification:** 산술 연산 결과, 메모리 입출력 데이터, 분기 시 PC 변화 등을 모니터링합니다.
 
 -----
 
@@ -227,7 +187,7 @@ APB 버스와 UART 주변장치를 중점적으로 검증하기 위해 **클래�
  ┣ 📂 src
  ┃ ┣ 📂 core              # CPU Core Logic
  ┃ ┃ ┣ 📜 CPU_RV32I.sv    # CPU Top Module
- ┃ ┃ ┣ 📜 ControlUnit.sv  # Instruction Decoder & FSM
+ ┃ ┃ ┣ 📜 ControlUnit.sv  # Multi-Cycle FSM Controller
  ┃ ┃ ┣ 📜 DataPath.sv     # ALU, Registers, PC Logic
  ┃ ┃ ┗ 📜 defines.sv      # Opcode Definitions
  ┃ ┣ 📂 bus               # Bus Interconnect
