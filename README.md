@@ -1,29 +1,35 @@
 # 🚀 SystemVerilog RISC-V RV32I Multi-Cycle MCU
 
+![Architecture](https://img.shields.io/badge/Architecture-RISC--V_RV32I-purple?style=flat&logo=riscv)
+![Implementation](https://img.shields.io/badge/Implementation-Multi_Cycle_FSM-blue?style=flat)
+![Bus](https://img.shields.io/badge/Bus_Protocol-AMBA_APB-orange?style=flat)
+![Language](https://img.shields.io/badge/Language-SystemVerilog-green?style=flat&logo=systemverilog)
+![Verification](https://img.shields.io/badge/Verification-UVM_Style_OOP-blue?style=flat)
+![Platform](https://img.shields.io/badge/Platform-Xilinx_Vivado-red?style=flat&logo=xilinx)
+
 > **32-bit RISC-V Multi-Cycle CPU Core + APB Interconnect + Peripherals**
 >
 > FSM 기반의 멀티 사이클 프로세서 설계 및 표준 버스 프로토콜을 적용한 FPGA 임베디드 MCU 시스템
 
------
+---
 
 ## 📖 1. 프로젝트 개요 (Overview)
 
-이 프로젝트는 SystemVerilog를 사용하여 RISC-V RV32I (Base Integer Instruction Set) 아키텍처를 구현한 프로세서 설계입니다. CPU 코어는 Control Unit과 DataPath로 명확히 분리되어 있으며, 최상위 모듈인 MCU에서 AMBA APB 프로토콜을 통해 메모리 및 다양한 주변장치(UART, GPIO)와 통합되어 실제 임베디드 어플리케이션을 실행할 수 있는 SoC 구조를 갖추고 있습니다.
+이 프로젝트는 **SystemVerilog**를 사용하여 **RISC-V RV32I (Base Integer Instruction Set)** 아키텍처를 **멀티 사이클(Multi-Cycle)** 방식으로 구현한 프로세서 설계입니다.
+단일 사이클 방식과 달리, **Finite State Machine (FSM)**을 통해 명령어 실행 과정을 `FETCH` → `DECODE` → `EXECUTE` → `MEMORY` → `WRITEBACK` 단계로 나누어 처리합니다. 이를 통해 하드웨어 자원을 효율적으로 공유하고, 임계 경로(Critical Path)를 줄여 동작 주파수를 최적화할 수 있는 구조를 갖추고 있습니다.
 
 ### ✨ 핵심 설계 특징 (Key Features)
+* **Multi-Cycle Microarchitecture:** FSM을 사용하여 명령어 종류에 따라 가변적인 클럭 사이클(3~5 Cycles)을 소모하며 실행 효율 최적화.
+* **FSM Based Control:** 14개의 상태(State)를 갖는 제어 유닛이 Datapath의 제어 신호를 순차적으로 관리.
+* **Bus System:** 표준 **AMBA APB 3.0 Protocol**을 구현한 Master Bridge를 통해 시스템 확장성 확보.
+* **Peripherals Integration:** UART, GPIO(LED, Switch) 등의 주변장치를 APB 버스에 통합하여 SoC(System on Chip) 구성.
+* **Advanced Verification:** OOP 기반의 트랜잭션 검증 환경을 통해 버스 프로토콜 및 시스템 동작 신뢰성 검증.
 
-  * **Multi-Cycle Microarchitecture:** FSM을 사용하여 명령어 종류에 따라 가변적인 클럭 사이클(3\~5 Cycles)을 소모하며 실행 효율 최적화.
-  * [cite_start]**FSM Based Control:** 14개의 상태(State)를 갖는 제어 유닛이 Datapath의 제어 신호를 순차적으로 관리 [cite: 1037-1050].
-  * **Bus System:** 표준 **AMBA APB 3.0 Protocol**을 구현한 Master Bridge를 통해 시스템 확장성 확보.
-  * **Peripherals Integration:** UART, GPIO(LED, Switch) 등의 주변장치를 APB 버스에 통합하여 SoC(System on Chip) 구성.
-  * **Advanced Verification:** OOP 기반의 트랜잭션 검증 환경을 통해 버스 프로토콜 및 시스템 동작 신뢰성 검증.
-
------
+---
 
 ## 🏗️ 2. 시스템 아키텍처 (System Architecture)
 
 ### 2.1 MCU Top-Level Diagram
-
 CPU는 명령어 인출과 데이터 접근을 위한 버스가 분리되어 있으며(Harvard Architecture), 주변 장치들은 APB Bridge를 통해 제어됩니다.
 
 ```mermaid
@@ -40,7 +46,7 @@ graph TD
         BRIDGE -->|PSEL3| GPIO["GPIO (Bidirectional)"]
         BRIDGE -->|PSEL4| UART["UART Controller"]
     end
-```
+````
 
 ### 2.2 CPU Internal Microarchitecture (Control & Datapath)
 
@@ -222,4 +228,5 @@ APB 버스와 UART 주변장치를 중점적으로 검증하기 위해 **클래�
 
 > *Designed with SystemVerilog for RISC-V Architecture Study*
 
+```
 ```
