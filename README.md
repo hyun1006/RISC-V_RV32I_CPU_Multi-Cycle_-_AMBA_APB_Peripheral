@@ -1,12 +1,3 @@
-요청하신 배지 스타일을 통일된 `flat` 스타일로 변경하고, 발표 자료 PDF 링크를 배지 형태로 자연스럽게 추가하여 가독성과 완성도를 높였습니다.
-
-아래 코드를 복사해서 `README.md` 파일에 그대로 붙여넣으시면 됩니다.
-
------
-
-### 📋 README.md (복사하여 사용하세요)
-
-````markdown
 # 🚀 SystemVerilog RISC-V RV32I Multi-Cycle MCU
 
 <div align="center">
@@ -201,12 +192,7 @@ APB 버스와 UART 주변장치를 중점적으로 검증하기 위해 **클래�
 
 본 프로젝트의 상세한 아키텍처 설계, FSM 상태도, 그리고 검증 결과 파형은 아래 보고서를 통해 확인하실 수 있습니다.
 
-\<div align="center"\>
-
-
 [![PDF Report](https://img.shields.io/badge/📄_PDF_Report-View_Document-FF0000?style=for-the-badge&logo=adobeacrobatreader&logoColor=white)](https://github.com/seokhyun-hwang/files/blob/main/RISC-V_RV32I_CPU_Multi-Cycle_-_AMBA_APB_Peripheral.pdf)
-
-\</div\>
 
 <br>
 
