@@ -2,12 +2,12 @@
 
 <div align="center">
 
-<img src="https://img.shields.io/badge/Architecture-RISC--V_RV32I-purple?style=flat&logo=riscv&logoColor=white" />
-<img src="https://img.shields.io/badge/Implementation-Multi_Cycle_FSM-blue?style=flat" />
-<img src="https://img.shields.io/badge/Bus_Protocol-AMBA_APB-orange?style=flat&logo=arm&logoColor=white" />
-<img src="https://img.shields.io/badge/Language-SystemVerilog-green?style=flat&logo=systemverilog&logoColor=white" />
-<img src="https://img.shields.io/badge/Verification-UVM_Style_OOP-blue?style=flat" />
-<img src="https://img.shields.io/badge/Platform-Xilinx_Vivado-red?style=flat&logo=xilinx&logoColor=white" />
+![Architecture](https://img.shields.io/badge/Architecture-RISC--V_RV32I-purple?style=for-the-badge&logo=riscv&logoColor=white)
+![Implementation](https://img.shields.io/badge/Implementation-Multi_Cycle_FSM-blue?style=for-the-badge)
+![Bus](https://img.shields.io/badge/Bus_Protocol-AMBA_APB-orange?style=for-the-badge&logo=arm&logoColor=white)
+![Language](https://img.shields.io/badge/Language-SystemVerilog-green?style=for-the-badge&logo=systemverilog&logoColor=white)
+![Verification](https://img.shields.io/badge/Verification-UVM_Style_OOP-blue?style=for-the-badge)
+![Platform](https://img.shields.io/badge/Platform-Xilinx_Vivado-red?style=for-the-badge&logo=xilinx&logoColor=white)
 
 <br>
 
@@ -192,7 +192,7 @@ APB 버스와 UART 주변장치를 중점적으로 검증하기 위해 **클래�
 
 본 프로젝트의 상세한 아키텍처 설계, FSM 상태도, 그리고 검증 결과 파형은 아래 보고서를 통해 확인하실 수 있습니다.
 
-[![PDF Report](https://img.shields.io/badge/📄_PDF_Report-View_Document-FF0000?style=for-the-badge&logo=adobeacrobatreader&logoColor=white)](https://github.com/seokhyun-hwang/files/blob/main/RISC-V_RV32I_CPU_Multi-Cycle_-_AMBA_APB_Peripheral.pdf)
+[](https://github.com/seokhyun-hwang/files/blob/main/RISC-V_RV32I_CPU_Multi-Cycle_-_AMBA_APB_Peripheral.pdf)
 
 <br>
 
@@ -239,6 +239,3 @@ APB 버스와 UART 주변장치를 중점적으로 검증하기 위해 **클래�
 -----
 
 Copyright ⓒ 2025. SEOKHYUN HWANG. All rights reserved.
-
-```
-```
